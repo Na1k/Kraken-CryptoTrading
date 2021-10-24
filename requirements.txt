@@ -5,3 +5,4 @@ datetime
 ast
 sqlalchemy
 matplotlib
+pymysql

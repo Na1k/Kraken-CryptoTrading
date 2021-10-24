@@ -37,8 +37,10 @@ try:
             df = pd.DataFrame(data, columns=["symbol", "time", "price"])
             df.to_sql('etheur', engine, if_exists='append', index=False)
             print(df)
+        """
         else:
             if(ast.literal_eval(message)["event"] == "heartbeat"):
                 print("Heartbeat detected")
+        """
 except KeyboardInterrupt as e:
     print(e)
