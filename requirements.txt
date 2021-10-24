@@ -1,0 +1,7 @@
+websocket
+pandas
+numpy
+datetime
+ast
+sqlalchemy
+matplotlib
