@@ -1,8 +1,6 @@
-websocket
+websocket-client
 pandas
 numpy
-datetime
-ast
 sqlalchemy
 matplotlib
 pymysql
