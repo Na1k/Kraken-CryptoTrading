@@ -6,8 +6,8 @@ import ast
 import sqlalchemy
 import pymysql
 
-#engstr = 'mysql+pymysql://root:root@localhost/kryptotrading?charset=utf8mb4'
-engstr = 'sqlite:///trading.db'
+engstr = 'mysql+pymysql://root:root@localhost/kryptotrading?charset=utf8mb4'
+#engstr = 'sqlite:///trading.db'
 
 # Connect to MySQL Server
 engine = sqlalchemy.create_engine(engstr)
