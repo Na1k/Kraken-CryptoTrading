@@ -58,7 +58,7 @@ def load_old(past_minutes):
         df = pd.DataFrame([data], columns=["time_end", "open", "high", "low", "close", "volume"])
         df.to_sql('etheur_ohlc', engine, if_exists='append', index=False)
 
-load_old(300)
+load_old(600)
 # Start a new thread for the WebSocket interface
 _thread.start_new_thread(ws_thread, ())
 
