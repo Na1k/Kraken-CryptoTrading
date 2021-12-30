@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime
+import krakenex
 import sqlalchemy
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -80,31 +81,69 @@ def get_BBANDS(df, tp, nbdup, nbddn, mt):
 def get_percentB(df):
     return ((df["close"]-df["BBlower"])/(df["BBupper"] - df["BBlower"]))
 
+def buy(df):
+    print("KAUFEN", datetime.now(), "Preis", df["close"].values[0])
+    return (df["close"].values[0] - 150)
 
-def strat(df, open_position):
-    if(not(open_position)):
+def sell(df):
+    print("VERKAUFEN", datetime.now(), "Preis", df["close"].values[0])
+    return
+
+def asc_stoploss(df, info):
+    stoploss_now = df["close"].values[0] - 150
+    if(info['stoploss'] < stoploss_now):
+        info['stoploss'] = stoploss_now
+    return info
+
+def strat(df, info):
+    #Check if database is up-to-date
+    time_df = df["time_end"].values[0]
+    time_now = np.datetime64(datetime.now())
+    if(not(time_now < time_df) or (not(time_now > (time_df - np.timedelta64(5,"m"))))):
+        print("time error")
+        return info
+    
+    print(info)
+    if(not(info['open_position'])):     #Buy Descision
         if((df["RSI"].values < 30) & (df["percent_b"].values < 0)):
-            print("KAUFEN", datetime.now(), "Preis", df["close"].values)
+            info['stoploss'] = buy(df)
             df2 = df[['close', 'time_end']].copy()
             df2["desc"] = ["b"]
             df2.to_sql('strat', engine, if_exists='append', index=False)
-            return True
-    elif(open_position):
-        if((df["RSI"].values > 70) & (df["percent_b"].values > 1)):
-            print("VERKAUFEN", datetime.now(), "Preis", df["close"].values)
+            info['open_position'] = True
+            return info
+    elif(info['open_position']):
+        if(df['close'].values[0] < info['stoploss']):   #Stop-Loss Descision
+            sell(df)
             df2 = df[['close', 'time_end']].copy()
-            df2["desc"] = ["b"]
+            df2["desc"] = ["sl"]
             df2.to_sql('strat', engine, if_exists='append', index=False)
-            return False
-    return open_position
+            info['open_position'] = False
+            time.sleep(900)
+            return info
+        else:
+            info = asc_stoploss(df, info)       #check for ascending Stop-Loss if Stop-Loss didn't trigger
+        
+        if((df["RSI"].values > 70) & (df["percent_b"].values > 1)):     #Selling Descision
+            sell(df)
+            df2 = df[['close', 'time_end']].copy()
+            df2["desc"] = ["s"]
+            df2.to_sql('strat', engine, if_exists='append', index=False)
+            info['open_position'] = False
+            return info
+    return info
 
-
+kraken = krakenex.API()
+kraken.load_key('./kraken.key')
 engstr = 'mysql+pymysql://root:root@localhost/kryptotrading?charset=utf8mb4'
+
 engine = sqlalchemy.create_engine(engstr)
-open_pos = False
+trade = {'open_position':False,
+         'stoploss':0}
+
 while True:
     try:
-        df = get_dataframe_from_sql(engine, 'SELECT * FROM etheur_ohlc;')
+        df = get_dataframe_from_sql(engine, 'SELECT * FROM etheur_ohlc_5;')
         df = df.drop_duplicates(subset=["time_end"], keep='last').sort_values(
             by="time_end", ascending=True).reset_index().drop(columns="index")
         df["RSI"] = get_RSI(df, 14)
@@ -113,7 +152,7 @@ while True:
             df, 12, 2, 2.4, MA_Type.T3)
         df["percent_b"] = get_percentB(df)
         printOhlcImage(df, "ohlc.png")
-        open_pos = strat(df.iloc[-1:], open_pos)
+        trade = strat(df.iloc[-1:], trade)
     except (Exception, KeyboardInterrupt) as e:
         print(e)
-    time.sleep(.5)
+    time.sleep(1.)
