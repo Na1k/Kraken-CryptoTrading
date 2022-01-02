@@ -1,4 +1,5 @@
 kraken.key
+strategy_ionos
 *.db
 # Byte-compiled / optimized / DLL files
 __pycache__/
