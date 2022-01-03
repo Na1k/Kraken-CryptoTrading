@@ -1,6 +1,0 @@
-websocket-client
-pandas
-numpy
-sqlalchemy
-matplotlib
-pymysql
