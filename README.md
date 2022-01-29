@@ -1,4 +1,4 @@
-# KryptoTrading
+# Kraken-KryptoTrading
 ## Scripts
 
 1. Load ETHEUR Data + Store in Database<br>
@@ -21,4 +21,3 @@ https://anaconda.org/plotly/plotly
 Krakenex:<br>
 https://python3-krakenex.readthedocs.io/en/latest/
 
-The rest should be trivial ;)
