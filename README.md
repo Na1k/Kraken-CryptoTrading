@@ -1,4 +1,4 @@
-# Kraken-KryptoTrading
+# Kraken-CryptoTrading
 ## Scripts
 
 1. Load ETHEUR Data + Store in Database<br>
